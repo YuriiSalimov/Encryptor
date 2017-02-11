@@ -103,10 +103,8 @@ public final class Encryptor implements IEncryptor {
      *
      * @param value     a value to encrypt or to decrypt.
      * @param secretKey a primary encoding format.
-     * @throws IllegalArgumentException
      */
-    public Encryptor(final String value, final SecretKey secretKey)
-            throws IllegalArgumentException {
+    public Encryptor(final String value, final SecretKey secretKey) {
         this(value, secretKey, Encryptor.staticCharsetName);
     }
 
@@ -116,7 +114,8 @@ public final class Encryptor implements IEncryptor {
      * @param value       a value to encrypt or to decrypt.
      * @param secretKey   a primary encoding format.
      * @param charsetName a name of supported Charset.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException Throw exception when
+     *                                  input parameters is illegal.
      */
     public Encryptor(
             final String value,
