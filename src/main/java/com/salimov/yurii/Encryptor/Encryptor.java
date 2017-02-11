@@ -38,7 +38,7 @@ public final class Encryptor implements IEncryptor {
     private static String staticCharsetName;
 
     /**
-     * Primary encoding format.
+     * Name of a supported Charset.
      */
     private final String charsetName;
 
@@ -113,8 +113,9 @@ public final class Encryptor implements IEncryptor {
     /**
      * Constructor.
      *
-     * @param value     a value to encrypt or to decrypt.
-     * @param secretKey a primary encoding format.
+     * @param value       a value to encrypt or to decrypt.
+     * @param secretKey   a primary encoding format.
+     * @param charsetName a name of supported Charset.
      * @throws IllegalArgumentException
      */
     public Encryptor(
