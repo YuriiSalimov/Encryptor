@@ -32,10 +32,10 @@ final class DESSecretKey implements SecretKey {
      * @param key a primary encoding format.
      */
     DESSecretKey(final byte[] key) {
-        if (key.length > 8) {
-            this.key = Arrays.copyOfRange(key, 0, 8);
+        if (key.length != 8) {
+            this.key = Arrays.copyOf(key, 8);
         } else {
-            this.key = key;
+            this.key = Arrays.copyOf(key, key.length);
         }
     }
 
