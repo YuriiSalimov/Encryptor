@@ -30,12 +30,17 @@ public final class Encryptor implements IEncryptor {
     /**
      * Primary encoding format.
      */
-    private static SecretKey secretKey;
+    private static SecretKey staticSecretKey;
 
     /**
      * Name of a default supported Charset.
      */
-    private static String charsetName;
+    private static String staticCharsetName;
+
+    /**
+     * Primary encoding format.
+     */
+    private final String charsetName;
 
     /**
      * Encrypt cipher.
@@ -60,8 +65,8 @@ public final class Encryptor implements IEncryptor {
                 new byte[]{5, 3, 7, 1, 2, 8, 6, 4}
         );
         DEFAULT_CHARSET_NAME = "UTF8";
-        secretKey = DEFAULT_KEY;
-        charsetName = DEFAULT_CHARSET_NAME;
+        staticSecretKey = DEFAULT_KEY;
+        staticCharsetName = DEFAULT_CHARSET_NAME;
     }
 
     /**
@@ -70,44 +75,64 @@ public final class Encryptor implements IEncryptor {
      * @param value a value to encrypt or to decrypt.
      */
     public Encryptor(final String value) {
-        this(value, Encryptor.secretKey);
+        this(value, Encryptor.staticSecretKey);
     }
 
     /**
      * Constructor.
      *
-     * @param value a value to encrypt or to decrypt.
-     * @param key   a primary encoding format.
+     * @param value     a value to encrypt or to decrypt.
+     * @param secretKey a primary encoding format.
      */
-    public Encryptor(final String value, final String key) {
-        this(value, key.getBytes());
+    public Encryptor(final String value, final String secretKey) {
+        this(value, secretKey.getBytes());
     }
 
     /**
      * Constructor.
      *
-     * @param value a value to encrypt or to decrypt.
-     * @param key   a primary encoding format.
+     * @param value     a value to encrypt or to decrypt.
+     * @param secretKey a primary encoding format.
      */
-    public Encryptor(final String value, final byte[] key) {
-        this(value, new DESSecretKey(key));
+    public Encryptor(final String value, final byte[] secretKey) {
+        this(value, new DESSecretKey(secretKey));
     }
 
     /**
      * Constructor.
      *
-     * @param value a value to encrypt or to decrypt.
-     * @param key   a primary encoding format.
+     * @param value     a value to encrypt or to decrypt.
+     * @param secretKey a primary encoding format.
      * @throws IllegalArgumentException
      */
-    public Encryptor(final String value, final SecretKey key)
+    public Encryptor(final String value, final SecretKey secretKey)
             throws IllegalArgumentException {
+        this(value, secretKey, Encryptor.staticCharsetName);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param value     a value to encrypt or to decrypt.
+     * @param secretKey a primary encoding format.
+     * @throws IllegalArgumentException
+     */
+    public Encryptor(
+            final String value,
+            final SecretKey secretKey,
+            final String charsetName
+    ) throws IllegalArgumentException {
         try {
             this.value = value;
-            this.encryptCipher = Cipher.getInstance(key.getAlgorithm());
-            this.encryptCipher.init(Cipher.ENCRYPT_MODE, key);
-            this.decryptCipher = Cipher.getInstance(key.getAlgorithm());
-            this.decryptCipher.init(Cipher.DECRYPT_MODE, key);
+            this.encryptCipher = Cipher.getInstance(secretKey.getAlgorithm());
+            this.encryptCipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            this.decryptCipher = Cipher.getInstance(secretKey.getAlgorithm());
+            this.decryptCipher.init(Cipher.DECRYPT_MODE, secretKey);
+            if (charsetName != null) {
+                this.charsetName = charsetName;
+            } else {
+                this.charsetName = Encryptor.staticCharsetName;
+            }
         } catch (Exception ex) {
             throw new IllegalArgumentException(ex.getMessage());
         }
@@ -163,7 +188,7 @@ public final class Encryptor implements IEncryptor {
      * @param secretKey a primary encoding format.
      */
     public static void setSecretKey(final String secretKey) {
-        if (charsetName != null) {
+        if (secretKey != null) {
             setSecretKey(secretKey.getBytes());
         } else {
             setSecretKey(DEFAULT_KEY);
@@ -177,9 +202,9 @@ public final class Encryptor implements IEncryptor {
      */
     public static void setSecretKey(final byte[] secretKey) {
         if (secretKey != null) {
-            Encryptor.secretKey = new DESSecretKey(secretKey);
+            Encryptor.staticSecretKey = new DESSecretKey(secretKey);
         } else {
-            Encryptor.secretKey = DEFAULT_KEY;
+            Encryptor.staticSecretKey = DEFAULT_KEY;
         }
     }
 
@@ -190,9 +215,9 @@ public final class Encryptor implements IEncryptor {
      */
     public static void setSecretKey(final SecretKey secretKey) {
         if (secretKey != null) {
-            Encryptor.secretKey = secretKey;
+            Encryptor.staticSecretKey = secretKey;
         } else {
-            Encryptor.secretKey = DEFAULT_KEY;
+            Encryptor.staticSecretKey = DEFAULT_KEY;
         }
     }
 
@@ -203,9 +228,9 @@ public final class Encryptor implements IEncryptor {
      */
     public static void setCharsetName(final String charsetName) {
         if (charsetName != null) {
-            Encryptor.charsetName = charsetName;
+            Encryptor.staticCharsetName = charsetName;
         } else {
-            Encryptor.charsetName = DEFAULT_CHARSET_NAME;
+            Encryptor.staticCharsetName = DEFAULT_CHARSET_NAME;
         }
     }
 
@@ -231,7 +256,7 @@ public final class Encryptor implements IEncryptor {
             IllegalBlockSizeException, UnsupportedEncodingException {
         return Base64.encodeBase64String(
                 this.encryptCipher.doFinal(
-                        this.value.getBytes(Encryptor.charsetName)
+                        this.value.getBytes(this.charsetName)
                 )
         ).replace("=", "");
     }
@@ -260,7 +285,7 @@ public final class Encryptor implements IEncryptor {
                 this.decryptCipher.doFinal(
                         Base64.decodeBase64(this.value)
                 ),
-                Encryptor.charsetName
+                this.charsetName
         ).replace("=", "");
     }
 }
