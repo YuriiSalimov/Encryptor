@@ -37,6 +37,7 @@ final class DESSecretKey implements SecretKey {
         } else {
             this.key = Arrays.copyOf(key, key.length);
         }
+        System.out.println(Arrays.toString(this.key));
     }
 
     /**

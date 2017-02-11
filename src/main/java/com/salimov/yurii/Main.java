@@ -9,7 +9,7 @@ import com.salimov.yurii.Encryptor.Encryptor;
 public class Main {
 
     public static void main(String[] args) {
-        String login = "SomeLogin";
+        String login = "SecretKey";
         String encLogin = new Encryptor(login).encrypt();
         String decLogin = new Encryptor(encLogin).decrypt();
         System.out.println(login + " -> " + encLogin + " -> " + decLogin);

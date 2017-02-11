@@ -62,7 +62,7 @@ public final class Encryptor implements IEncryptor {
      */
     static {
         DEFAULT_KEY = new DESSecretKey(
-                new byte[]{1, 2, 3, 4, 5, 6, 7, 8}
+                ("SoMeSeCrEtKeY").getBytes()
         );
         DEFAULT_CHARSET_NAME = "UTF8";
         staticSecretKey = DEFAULT_KEY;
