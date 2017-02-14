@@ -201,7 +201,7 @@ public final class Encryptor implements IEncryptor {
      * @param secretKey a primary encoding format.
      */
     public static void setSecretKey(final byte[] secretKey) {
-        if (secretKey != null) {
+        if ((secretKey != null) && (secretKey.length > 0)) {
             Encryptor.staticSecretKey = new DESSecretKey(secretKey);
         } else {
             Encryptor.staticSecretKey = DEFAULT_KEY;
