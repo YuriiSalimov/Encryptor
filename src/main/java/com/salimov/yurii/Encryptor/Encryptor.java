@@ -61,9 +61,7 @@ public final class Encryptor implements IEncryptor {
      * Static block.
      */
     static {
-        DEFAULT_KEY = new DESSecretKey(
-                ("SoMeSeCrEtKeY").getBytes()
-        );
+        DEFAULT_KEY = new DESSecretKey(("SoMeSeCrEtKeY").getBytes());
         DEFAULT_CHARSET_NAME = "UTF8";
         staticSecretKey = DEFAULT_KEY;
         staticCharsetName = DEFAULT_CHARSET_NAME;
@@ -150,7 +148,7 @@ public final class Encryptor implements IEncryptor {
             result = getEncryptedString();
         } catch (Exception ex) {
             ex.printStackTrace();
-            result = null;
+            result = "";
         }
         return result;
     }
@@ -167,7 +165,7 @@ public final class Encryptor implements IEncryptor {
             result = getDecryptedString();
         } catch (Exception ex) {
             ex.printStackTrace();
-            result = null;
+            result = "";
         }
         return result;
     }
@@ -202,9 +200,9 @@ public final class Encryptor implements IEncryptor {
      */
     public static void setSecretKey(final byte[] secretKey) {
         if ((secretKey != null) && (secretKey.length > 0)) {
-            Encryptor.staticSecretKey = new DESSecretKey(secretKey);
+            setSecretKey(new DESSecretKey(secretKey));
         } else {
-            Encryptor.staticSecretKey = DEFAULT_KEY;
+            setSecretKey(DEFAULT_KEY);
         }
     }
 
@@ -282,9 +280,7 @@ public final class Encryptor implements IEncryptor {
     private String getDecryptedString() throws BadPaddingException,
             IllegalBlockSizeException, UnsupportedEncodingException {
         return new String(
-                this.decryptCipher.doFinal(
-                        Base64.decodeBase64(this.value)
-                ),
+                this.decryptCipher.doFinal(Base64.decodeBase64(this.value)),
                 this.charsetName
         ).replace("=", "");
     }
