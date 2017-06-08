@@ -269,27 +269,49 @@ public final class Base64Encryptor implements Encryptor {
     }
 
     /**
+     * Checks if a CharSequence is not empty (""), not null and not whitespace only.
+     * <pre>
+     *     isNotEmpty(null) = false
+     *     isNotEmpty("") = false
+     *     isNotEmpty(" ") = false
+     *     isNotEmpty("bob") = true
+     *     isNotEmpty("  bob  ") = true
+     * </pre>
      *
-     * @param value
-     * @return
+     * @param value the CharSequence to check, may be null
+     * @return true if the CharSequence is not empty and not null
+     * and not whitespace, false otherwise.
      */
     private static boolean isNotEmpty(final String value) {
         return isNotNull(value) && !value.isEmpty();
     }
 
     /**
+     * Checks if a array is not null and not empty.
+     * <pre>
+     *     isNotEmpty(null) = false
+     *     isNotEmpty(new byte[]{}) = false
+     *     isNotEmpty(new byte[]{1}) = true
+     *     isNotEmpty(new byte[]{1, 2, 3}) = true
+     * </pre>
      *
-     * @param bytes
-     * @return
+     * @param bytes the array to check, may be null
+     * @return true if the array is not null and not empty,
+     * false otherwise.
      */
     private static boolean isNotEmpty(final byte[] bytes) {
         return isNotNull(bytes) && (bytes.length > 0);
     }
 
     /**
+     * Checks if a Object is not null.
+     * <pre>
+     *     isNotNull(null) = false
+     *     isNotNull(new Object()) = true
+     * </pre>
      *
-     * @param object
-     * @return
+     * @param object the Object to check, may be null
+     * @return true if the Object is not null, false otherwise.
      */
     private static boolean isNotNull(final Object object) {
         return (object != null);
