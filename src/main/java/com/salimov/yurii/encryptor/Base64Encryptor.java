@@ -171,6 +171,7 @@ public final class Base64Encryptor implements Encryptor {
     /**
      * Encrypts a string and returns it.
      *
+     * @param value the value to encrypt.
      * @return The encrypted string (newer null).
      * @throws InvalidKeyException          if the secret key is invalid.
      * @throws BadPaddingException          if this cipher is in decryption mode,
@@ -199,6 +200,7 @@ public final class Base64Encryptor implements Encryptor {
     /**
      * Decrypts a string and returns it.
      *
+     * @param value the value to decrypt.
      * @return The decrypted string (newer null).
      * @throws InvalidKeyException          if the secret key is invalid.
      * @throws BadPaddingException          if this cipher is in decryption mode,
