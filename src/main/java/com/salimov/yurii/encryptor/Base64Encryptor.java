@@ -31,35 +31,25 @@ public final class Base64Encryptor implements Encryptor {
     private final static String DEFAULT_CHARSET_NAME = "UTF8";
 
     /**
-     * Primary encoding format.
-     */
-    private static SecretKey staticSecretKey = DEFAULT_KEY;
-
-    /**
-     * Name of a default supported Charset.
-     */
-    private static String staticCharsetName = DEFAULT_CHARSET_NAME;
-
-    /**
      * Name of a supported Charset.
      */
     private final String charsetName;
 
     /**
-     * Encrypt cipher.
+     * Secret key.
      */
-    private final Cipher encryptCipher;
+    private final SecretKey secretKey;
 
     /**
-     * Decrypt cipher.
+     * Encrypt cipher.
      */
-    private final Cipher decryptCipher;
+    private final Cipher cipher;
 
     /**
      * Constructor.
      */
     public Base64Encryptor() {
-        this(Base64Encryptor.staticSecretKey);
+        this(DEFAULT_KEY);
     }
 
     /**
@@ -68,7 +58,20 @@ public final class Base64Encryptor implements Encryptor {
      * @param secretKey the primary encoding format.
      */
     public Base64Encryptor(final String secretKey) {
-        this(secretKey.getBytes());
+        this(isNotEmpty(secretKey) ? secretKey.getBytes() : KEY.getBytes());
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param secretKey   the primary encoding format.
+     * @param charsetName the name of supported Charset.
+     */
+    public Base64Encryptor(final String secretKey, String charsetName) {
+        this(
+                isNotEmpty(secretKey) ? secretKey.getBytes() : KEY.getBytes(),
+                charsetName
+        );
     }
 
     /**
@@ -77,7 +80,20 @@ public final class Base64Encryptor implements Encryptor {
      * @param secretKey the primary encoding format.
      */
     public Base64Encryptor(final byte[] secretKey) {
-        this(new DESSecretKey(secretKey));
+        this(isNotEmpty(secretKey) ? new DESSecretKey(secretKey) : DEFAULT_KEY);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param secretKey   the primary encoding format.
+     * @param charsetName the name of supported Charset.
+     */
+    public Base64Encryptor(final byte[] secretKey, String charsetName) {
+        this(
+                isNotEmpty(secretKey) ? new DESSecretKey(secretKey) : DEFAULT_KEY,
+                charsetName
+        );
     }
 
     /**
@@ -86,7 +102,7 @@ public final class Base64Encryptor implements Encryptor {
      * @param secretKey the primary encoding format.
      */
     public Base64Encryptor(final SecretKey secretKey) {
-        this(secretKey, Base64Encryptor.staticCharsetName);
+        this(secretKey, DEFAULT_CHARSET_NAME);
     }
 
     /**
@@ -99,15 +115,9 @@ public final class Base64Encryptor implements Encryptor {
      */
     public Base64Encryptor(final SecretKey secretKey, final String charsetName) throws IllegalArgumentException {
         try {
-            this.encryptCipher = Cipher.getInstance(secretKey.getAlgorithm());
-            this.encryptCipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            this.decryptCipher = Cipher.getInstance(secretKey.getAlgorithm());
-            this.decryptCipher.init(Cipher.DECRYPT_MODE, secretKey);
-            if (isNotEmpty(charsetName)) {
-                this.charsetName = charsetName;
-            } else {
-                this.charsetName = Base64Encryptor.staticCharsetName;
-            }
+            this.secretKey = isNotNull(secretKey) ? secretKey : DEFAULT_KEY;
+            this.charsetName = isNotEmpty(charsetName) ? charsetName : DEFAULT_CHARSET_NAME;
+            this.cipher = Cipher.getInstance(this.secretKey.getAlgorithm());
         } catch (Exception ex) {
             throw new IllegalArgumentException(ex.getMessage());
         }
@@ -124,6 +134,7 @@ public final class Base64Encryptor implements Encryptor {
         String result;
         if (isNotEmpty(value)) {
             try {
+                this.cipher.init(Cipher.ENCRYPT_MODE, secretKey);
                 result = getEncryptedString(value);
             } catch (Exception ex) {
                 logException(ex);
@@ -146,6 +157,7 @@ public final class Base64Encryptor implements Encryptor {
         String result;
         if (isNotEmpty(value)) {
             try {
+                this.cipher.init(Cipher.DECRYPT_MODE, this.secretKey);
                 result = getDecryptedString(value);
             } catch (Exception ex) {
                 logException(ex);
@@ -155,58 +167,6 @@ public final class Base64Encryptor implements Encryptor {
             result = "";
         }
         return result;
-    }
-
-    /**
-     * Sets a primary encoding format.
-     *
-     * @param secretKey the primary encoding format.
-     */
-    public static void setSecretKey(final String secretKey) {
-        if (isNotEmpty(secretKey)) {
-            setSecretKey(secretKey.getBytes());
-        } else {
-            setSecretKey(DEFAULT_KEY);
-        }
-    }
-
-    /**
-     * Sets a primary encoding format.
-     *
-     * @param secretKey the primary encoding format.
-     */
-    public static void setSecretKey(final byte[] secretKey) {
-        if (isNotEmpty(secretKey)) {
-            setSecretKey(new DESSecretKey(secretKey));
-        } else {
-            setSecretKey(DEFAULT_KEY);
-        }
-    }
-
-    /**
-     * Sets a primary encoding format.
-     *
-     * @param secretKey the primary encoding format.
-     */
-    public static void setSecretKey(final SecretKey secretKey) {
-        if (isNotNull(secretKey)) {
-            Base64Encryptor.staticSecretKey = secretKey;
-        } else {
-            Base64Encryptor.staticSecretKey = DEFAULT_KEY;
-        }
-    }
-
-    /**
-     * Sets name of a default supported Charset.
-     *
-     * @param charsetName the name of a default supported Charset.
-     */
-    public static void setCharsetName(final String charsetName) {
-        if (isNotEmpty(charsetName)) {
-            Base64Encryptor.staticCharsetName = charsetName;
-        } else {
-            Base64Encryptor.staticCharsetName = DEFAULT_CHARSET_NAME;
-        }
     }
 
     /**
@@ -230,7 +190,7 @@ public final class Base64Encryptor implements Encryptor {
     private String getEncryptedString(final String value) throws BadPaddingException,
             IllegalBlockSizeException, UnsupportedEncodingException {
         final byte[] valueBytes = value.getBytes(this.charsetName);
-        final byte[] encryptBytes = this.encryptCipher.doFinal(valueBytes);
+        final byte[] encryptBytes = this.cipher.doFinal(valueBytes);
         return Base64.encodeBase64String(encryptBytes).replace("=", "");
     }
 
@@ -255,7 +215,7 @@ public final class Base64Encryptor implements Encryptor {
     private String getDecryptedString(final String value) throws BadPaddingException,
             IllegalBlockSizeException, UnsupportedEncodingException {
         final byte[] decodeBytes = Base64.decodeBase64(value);
-        final byte[] decryptBytes = this.decryptCipher.doFinal(decodeBytes);
+        final byte[] decryptBytes = this.cipher.doFinal(decodeBytes);
         return new String(decryptBytes, this.charsetName).replace("=", "");
     }
 
