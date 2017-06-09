@@ -13,7 +13,7 @@ public interface Encryptor {
      * @param value the value to encrypt.
      * @return The encrypted data.
      */
-    String encrypt(final String value);
+    String encrypt(String value);
 
     /**
      * Decrypts a date.
@@ -27,5 +27,5 @@ public interface Encryptor {
      * @param value the value to decrypt.
      * @return The decrypted data.
      */
-    String decrypt(final String value);
+    String decrypt(String value);
 }
