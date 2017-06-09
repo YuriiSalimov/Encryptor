@@ -7,6 +7,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
 
 /**
  * The class implements methods for data encryption.
@@ -134,7 +135,6 @@ public final class Base64Encryptor implements Encryptor {
         String result;
         if (isNotEmpty(value)) {
             try {
-                this.cipher.init(Cipher.ENCRYPT_MODE, secretKey);
                 result = getEncryptedString(value);
             } catch (Exception ex) {
                 logException(ex);
@@ -157,7 +157,6 @@ public final class Base64Encryptor implements Encryptor {
         String result;
         if (isNotEmpty(value)) {
             try {
-                this.cipher.init(Cipher.DECRYPT_MODE, this.secretKey);
                 result = getDecryptedString(value);
             } catch (Exception ex) {
                 logException(ex);
@@ -173,6 +172,7 @@ public final class Base64Encryptor implements Encryptor {
      * Encrypts a string and returns it.
      *
      * @return The encrypted string (newer null).
+     * @throws InvalidKeyException          if the secret key is invalid.
      * @throws BadPaddingException          if this cipher is in decryption mode,
      *                                      and (un)padding has been requested,
      *                                      but the decrypted data is not bounded
@@ -187,8 +187,10 @@ public final class Base64Encryptor implements Encryptor {
      *                                      input data provided.
      * @throws UnsupportedEncodingException If the named charset is not supported.
      */
-    private String getEncryptedString(final String value) throws BadPaddingException,
+    private String getEncryptedString(final String value)
+            throws InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException, UnsupportedEncodingException {
+        this.cipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
         final byte[] valueBytes = value.getBytes(this.charsetName);
         final byte[] encryptBytes = this.cipher.doFinal(valueBytes);
         return Base64.encodeBase64String(encryptBytes).replace("=", "");
@@ -198,6 +200,7 @@ public final class Base64Encryptor implements Encryptor {
      * Decrypts a string and returns it.
      *
      * @return The decrypted string (newer null).
+     * @throws InvalidKeyException          if the secret key is invalid.
      * @throws BadPaddingException          if this cipher is in decryption mode,
      *                                      and (un)padding has been requested,
      *                                      but the decrypted data is not bounded
@@ -212,8 +215,10 @@ public final class Base64Encryptor implements Encryptor {
      *                                      input data provided.
      * @throws UnsupportedEncodingException If the named charset is not supported.
      */
-    private String getDecryptedString(final String value) throws BadPaddingException,
+    private String getDecryptedString(final String value)
+            throws InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException, UnsupportedEncodingException {
+        this.cipher.init(Cipher.DECRYPT_MODE, this.secretKey);
         final byte[] decodeBytes = Base64.decodeBase64(value);
         final byte[] decryptBytes = this.cipher.doFinal(decodeBytes);
         return new String(decryptBytes, this.charsetName).replace("=", "");
